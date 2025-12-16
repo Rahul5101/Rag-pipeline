@@ -1,0 +1,46 @@
+llm:
+  google:
+    provider: "google"
+    model_name: "gemini-2.5-flash"
+
+embedding:
+  google:
+    provider: "google"
+    model_name: "models/gemini-embedding-001"
+
+credentials:
+  service_account_path: "service-account.json"
+  project_id: "km-income-tax"
+  location: "global"
+
+src:
+  preprocessing:
+    base_url: "http://localhost:8000/open-pdf?file_path="
+    relative_pdf_path: "../data_02/pdf_data"
+    num_result: 30
+
+  reranker:
+    ranking_config: "default_ranking_config"
+    model: "semantic-ranker-default@latest"
+
+  chunking:
+    chunk_size: 700
+    chunk_overlap: 150
+
+milvus:
+  collection_name: "demo_income_tax"
+  partition_name: "default"
+  host: "milvus-standalone"
+  port: 19530
+  model_dim: 3072
+  batch_size: 10
+
+data_ingestion:
+  orc:
+    chunk_size: 50
+    input_folder: "D:/valiance_sol/01_project/data_02"
+    output_folder: "D:/valiance_sol/01_project/clean_04/cleaned_file"
+
+  file_cleaning:
+    input_folder: "D:/valiance_sol/01_project/clean_04/cleaned_file/pdf_data"
+    output_folder: "D:/valiance_sol/01_project/clean_04/final_cleaned_file"
