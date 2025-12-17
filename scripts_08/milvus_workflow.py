@@ -2,7 +2,8 @@ from milvus_05.factory_client import MilvusDB
 from milvus_05.config import DB
 from milvus_05.milvus_db import insert_documents_in_milvus
 
-from src_06.step2_chunking import load_txt
+from src_06.step2_chunking import fileloader
+
 
 milvus_db = MilvusDB()
 milvus_client = milvus_db.load_db()
@@ -18,25 +19,26 @@ def process_folder(root_folder: str):
 
     for subdir, _, files in os.walk(root_folder):
         for file in files:
-            if file.endswith(".txt"):
-                file_path = os.path.join(subdir, file)
-                print(f"\n📂 Processing file: {file_path}")
+            
+            filepath = os.path.join(subdir, file)
+            print(f"\n📂 Processing file: {filepath}")
 
                 # Load + chunk
-                docs = load_txt(file_path=file_path)
-                print(f"   ➝ Loaded {len(docs)} chunks from {file}")
+            formatter = fileloader(filepath)
+            docs = formatter.docs
+            print(f"   ➝ Loaded {len(docs)} chunks from {file}")
 
                 # Insert into Milvus
-                inserted_count, skipped_count = insert_documents_in_milvus(docs=docs)
+            inserted_count, skipped_count = insert_documents_in_milvus(docs=docs)
 
                 # Track stats
-                filewise_stats[file_path] = {
-                    "inserted": inserted_count,
-                    "skipped": skipped_count
-                }
-                total_vectors += inserted_count
+            filewise_stats[filepath] = {
+                "inserted": inserted_count,
+                "skipped": skipped_count
+            }
+            total_vectors += inserted_count
 
-                print(f"   ✅ Inserted: {inserted_count}, Skipped: {skipped_count}")
+            print(f"   ✅ Inserted: {inserted_count}, Skipped: {skipped_count}")
 
     # Final summary
     print("\n📊 --- Insertion Summary ---")

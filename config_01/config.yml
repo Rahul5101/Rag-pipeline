@@ -30,8 +30,8 @@ src:
 milvus:
   collection_name: "demo_income_tax"
   partition_name: "default"
-  host: "milvus-standalone"
-  port: 19530
+  host: "localhost"
+  port: "19530"
   model_dim: 3072
   batch_size: 10
 

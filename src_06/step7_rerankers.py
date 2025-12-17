@@ -7,8 +7,8 @@ service_account_path = os.path.abspath(service_account)
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = service_account_path
 projectId = config["credentials"]["project_id"]
 Location = config["credentials"]["location"]
-model = config["src"]["Reranker"]["model"]
-rankingConfig = config["src"]["Reranker"]["ranking_config"]
+model = config["src"]["reranker"]["model"]
+rankingConfig = config["src"]["reranker"]["ranking_config"]
 
 def rerank_with_google(query, docs, projectId, location=Location, return_scores=False):
     client = discoveryengine.RankServiceClient()

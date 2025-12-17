@@ -16,16 +16,19 @@ milvus_client = milvus_db.load_db()
 milvus_db.create_partition_if_not_exists(collection_name=DB.milvus_collection_name,partition_name=DB.default_partition)
 start = time.time()
 
-# query = "what is the charge of income tax capital?"
-query = "tell me about the  Estimation of Profit in Sahara Land Dealings"
+query = "what is the charge of income tax capital?"
+# query = "tell me about the  Estimation of Profit in Sahara Land Dealings"
+# query = "What were the specific details of the seized material that corroborated the 20% profit margin?"
+# query = "tell me about Income tax Q and A-16 Section 54/54F -6 Q51"
 print("query: ",query)
 
 
+session_id="test_session_1"
 
 
 # print("translated query: ",query)
 
-response = asyncio.run(main(query=query))
+response = asyncio.run(main(query=query,session_id=session_id))
 
 # print("Response: ",response)
 

@@ -15,19 +15,74 @@ from src_06.utils import load_config
 import time
 import re
 from src_06.step8_utility import escape_inner_quotes,replace_links,safe_json_loads
+from src_06.step9_persistant_memory import save_chat_turn,load_chat_context
+from langchain_google_genai import ChatGoogleGenerativeAI
+def build_prompt(query, chat_history, retrieved_docs):
+    conversation_context = ""
+    for msg in chat_history:
+        conversation_context += (
+            f"User: {msg['question']}\n"
+            f"Assistant: {msg['answer']['response']}\n\n"
+        )
 
-async def main(query):
+    final_prompt = f"""
+You are an AI assistant.
+
+Previous conversation (for reference only, do NOT answer from this unless relevant):
+{conversation_context}
+
+Retrieved knowledge base context:
+{retrieved_docs}
+
+User question:
+{query}
+
+Answer the question using the retrieved knowledge.
+"""
+
+    return final_prompt.strip()
+
+
+
+
+async def main(query,session_id="default_session"):
     print("Loading embedding model and LLM...")
     config = load_config()
     em_model = config['embedding']['google']['model_name']
     embedding_model = GoogleGenerativeAIEmbeddings(model=em_model)
 
+    print(f"Loading session: {session_id}")
+    chat_content = load_chat_context(session_id)
+    conversation_context = ""
+    for msg in chat_content[-3:]:
+        conversation_context += (
+            f"User: {msg.get('question')}\n"
+            f"Assistant: {msg.get('answer')}\n\n"
+        )       
     tasks = process_file(query=query, embedding_model=embedding_model)
+
+  
+    # final_prompt = build_prompt(
+    #     query=query,
+    #     chat_history=chat_content,
+    #     retrieved_docs=tasks["response"]
+    # )
+
+
+    # llm = ChatGoogleGenerativeAI(
+    #     model=config["llm"]["google"]["model_name"],
+    #     temperature=0.3
+    # )
+
+    # llm_response = llm.invoke(final_prompt).content
+    # llm_response = "\n\n".join([f"{r['response']}" for r in llm_response])
+
+    # print("LLM Response: ",llm_response)
     
-    results = [tasks]
+    results = [tasks]  
 
     # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7")
-    # print("Result: ",results)
+    # print("Result: ",results) 
     # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7")
 
     per_file_responses = [r for r in results if r]
@@ -73,7 +128,7 @@ async def main(query):
     all_meta_data = deduped_meta_data
     # print("all_meta_data::::::::: ",all_meta_data)
 
-
+    
     print("\nGenerating final summary...")
     complete_response = "\n\n".join([f"{r['response']}" for r in per_file_responses])
 
@@ -86,6 +141,7 @@ async def main(query):
 
     # Example LLM output
     raw_text = complete_response
+    # raw_text = llm_response
     # print(raw_text)
 
     html_text = replace_links(raw_text, all_meta_data)
@@ -125,6 +181,11 @@ async def main(query):
         "ucid": "99_18"
     }
     print("final output", output)
+    save_chat_turn(
+        session_id=session_id,
+        question=query,
+        answer_dict=output
+    )
 
     # print(output)
     return output

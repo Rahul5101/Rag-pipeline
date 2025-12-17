@@ -1,0 +1,77 @@
+import os
+import json
+
+HISTORY_DIR = "chat_history"
+
+def get_full_conversation(session_id):
+    """
+    Returns the full conversation for a given session_id.
+    """
+    file_path = os.path.join(HISTORY_DIR, f"{session_id}.json")
+
+    if not os.path.exists(file_path):
+        return {
+            "session_id": session_id,
+            "exists": False,
+            "conversation": []
+        }
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        history = json.load(f)
+
+    return {
+        "session_id": session_id,
+        "exists": True,
+        "total_turns": len(history),
+        "conversation": history
+    }
+
+
+def get_recent_conversation(session_id, last_n=5):
+    """
+    Returns last N conversation turns for a session_id.
+    """
+    file_path = os.path.join(HISTORY_DIR, f"{session_id}.json")
+
+    if not os.path.exists(file_path):
+        return {
+            "session_id": session_id,
+            "exists": False,
+            "conversation": []
+        }
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        history = json.load(f)
+
+    return {
+        "session_id": session_id,
+        "exists": True,
+        "returned_turns": min(last_n, len(history)),
+        "conversation": history[-last_n:]
+    }
+
+def print_conversation(session_id, last_n=None):
+    data = (
+        get_recent_conversation(session_id, last_n)
+        if last_n else
+        get_full_conversation(session_id)
+    )
+
+    if not data["exists"]:
+        print(f"❌ No conversation found for session: {session_id}")
+        return
+
+    print(f"\n🧵 Session ID: {session_id}")
+    print("=" * 60)
+
+    for i, turn in enumerate(data["conversation"], 1):
+        print(f"\nTurn {i}")
+        print(f"🕒 {turn['timestamp']}")
+        print(f"👤 User: {turn['question']}")
+        print(f"🤖 Assistant:\n{turn['answer']['response']}")
+        print("-" * 60)
+
+
+# print_conversation("test_session_1")
+print_conversation("test_session_1", last_n=2)
+
