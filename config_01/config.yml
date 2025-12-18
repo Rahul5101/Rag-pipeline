@@ -16,7 +16,8 @@ credentials:
 src:
   preprocessing:
     base_url: "http://localhost:8000/open-pdf?file_path="
-    relative_pdf_path: "../data_02/pdf_data"
+    # relative_pdf_path: "../data_02/pdf_data"
+    relative_pdf_path: "/app/data_02/pdf_data"
     num_result: 30
 
   reranker:
@@ -28,19 +29,21 @@ src:
     chunk_overlap: 150
 
 milvus:
-  collection_name: "demo_income_tax"
-  partition_name: "default"
-  host: "localhost"
+  collection_name: "demo_project01"
+  partition_name: "other"
+  host: "standalone"
   port: "19530"
   model_dim: 3072
-  batch_size: 10
+  batch_size: 128
+
 
 data_ingestion:
   orc:
     chunk_size: 50
-    input_folder: "D:/valiance_sol/01_project/data_02"
-    output_folder: "D:/valiance_sol/01_project/clean_04/cleaned_file"
+    # Use internal container paths
+    input_folder: "/app/data_02"
+    output_folder: "/app/clean_04/cleaned_file"
 
   file_cleaning:
-    input_folder: "D:/valiance_sol/01_project/clean_04/cleaned_file/pdf_data"
-    output_folder: "D:/valiance_sol/01_project/clean_04/final_cleaned_file"
+    input_folder: "/app/clean_04/cleaned_file/pdf_data"
+    output_folder: "/app/clean_04/final_cleaned_file"

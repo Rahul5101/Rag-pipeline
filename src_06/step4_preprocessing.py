@@ -175,7 +175,7 @@ def generate_source_url(source_filename: str, page: int) -> str:
     return f"{BASE_URL}{final_path}#page={page}"  
 
     
-def process_file(query, embedding_model):
+def process_file(query, embedding_model,chat_history):
     try:
         # ... (Step 1: Embed query) ...
         query_vector = embedding_model.embed_query(query)
@@ -256,7 +256,7 @@ def process_file(query, embedding_model):
         context = "\n\n".join(context_chunks)
 
         x1 = time.time()
-        formated_prompt = prompt.format(context=context, question=query)
+        formated_prompt = prompt.format(context=context, question=query,chat_history=chat_history)
         model = GenerativeModel(
             model_name,
         )

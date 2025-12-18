@@ -10,7 +10,7 @@ from pymilvus import Collection
 from src_06.utils import load_config
 config = load_config()
 # batch_size = 10  # adjust based on memory and Milvus performance
-model= config["llm"]["google"]["model_name"]
+model= config["embedding"]["google"]["model_name"]
 batch_size = config["milvus"]["batch_size"]
 partition_name = config["milvus"]["partition_name"]
 embedding_model = GoogleGenerativeAIEmbeddings(model=model)
@@ -34,7 +34,7 @@ def insert_documents_in_milvus(docs, partition_name=partition_name, batch_size=b
 
     for doc in docs:
         content = doc.page_content.strip()
-        page = doc.metadata.get("page", '')
+        page = doc.metadata.get("page", -1)
         source = doc.metadata.get("source", "unknown")
         url = doc.metadata.get("url",None)
 

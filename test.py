@@ -16,10 +16,13 @@ milvus_client = milvus_db.load_db()
 milvus_db.create_partition_if_not_exists(collection_name=DB.milvus_collection_name,partition_name=DB.default_partition)
 start = time.time()
 
-query = "what is the charge of income tax capital?"
+# query = "what is the charge of income tax capital?"
 # query = "tell me about the  Estimation of Profit in Sahara Land Dealings"
 # query = "What were the specific details of the seized material that corroborated the 20% profit margin?"
-# query = "tell me about Income tax Q and A-16 Section 54/54F -6 Q51"
+# query = "hey my name is rahul tell me about Income tax Q and A-16 Section 54/54F -6 Q51 and also keep in mind my name is rahul"
+# query = "hey my name is rahul how are you doing today?"\
+# query = "hey my name is deepak i'm a civil engineer , can you tell me about income tax capital?"
+query = "what kind of engineer am i ?"
 print("query: ",query)
 
 

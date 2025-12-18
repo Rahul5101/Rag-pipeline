@@ -4,8 +4,8 @@ import os
 from src_06.utils import load_config
 config = load_config()
 load_dotenv()
-MILVUS_HOST = config["milvus"]["host"]
-MILVUS_PORT = config["milvus"]["port"]
+MILVUS_HOST = os.getenv("MILVUS_HOST")
+MILVUS_PORT = os.getenv("MILVUS_PORT")
 collection_name = config["milvus"]["collection_name"]
 partition_name = config["milvus"]["partition_name"]
 model_dim = config["milvus"]["model_dim"]

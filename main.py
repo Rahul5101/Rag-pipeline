@@ -34,6 +34,7 @@ app.add_middleware(
 # Request model: user sends a question
 class QuestionRequest(BaseModel):
     question: str
+    session_id: str = "test_session_01"
 # # Response model: we respond with JSON
 class AnswerResponse(BaseModel):
     answer: str
@@ -69,13 +70,14 @@ async def open_pdf_endpoint(file_path:str=Query(..., description="Encoded absolu
 @app.post("/query", response_model=AnswerResponse)
 def answer_question(request: QuestionRequest):
     user_question = request.question
+    session_id = request.session_id
     start_time = time.time()
 
     
 
     print("translated query: ",user_question)
     db_load = loading_milvus()
-    response_data = asyncio.run(main(query=user_question))
+    response_data = asyncio.run(main(query=user_question,session_id=session_id))
     elapsed_time = time.time() - start_time
 
     print(f"\nTotal time consumed: {elapsed_time:.2f} seconds")

@@ -1,0 +1,17 @@
+### what we are doing in the 01_project what is structure and how can someone run the query and get the response. ###
+
+1. first we have some pdf, csv file and json file or other file format. For pdf first we extract the text of pdf files using ocr
+    pipeline whose files is inside the {data_ingestion_and_cleaning/step1_ocr}, and we have already json file which is a clean file 
+    format. and for csv files we can extract row and column using csv library.so for now we all files in the clean format and in 
+    this we save all these files in {clean_04/final_cleaned_files}.
+
+2. our first goal is to send the data in the milvus database by converting them into embeddings and instead of loading the very 
+    large text in milvus we first create the chunking of the entire text which in our case is 700, and for chunking we need to 
+    convert the entire text into the langchain document  in {src_06/step2_chunking}. and this process happening when we run the 
+    {scripts_08/milvus_workflow.py} file
+
+3. then we run the milvus_workflow.py file which take the all file path one by one and convert the text of file into document 
+    object and do chunking and send these chunks into the {insert_documents_in_milvus} function which which then creates the 
+    chunks embeddings and load it to the milvus at a particular collection and partition.
+
+4. After the data loading on milvus is completed we test the code run the test.py file 

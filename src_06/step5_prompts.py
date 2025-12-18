@@ -204,6 +204,10 @@ Context:
 
 Question:  
 {question}
+
+also check the chat_history conversation for context continuity and include relevant information from there:
+chat_history:
+{chat_history}
 ''',
-    input_variables=['context', 'question']
+    input_variables=['context', 'question', 'chat_history']
 )

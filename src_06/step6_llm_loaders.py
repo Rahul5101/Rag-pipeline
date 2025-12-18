@@ -10,39 +10,13 @@ import asyncio
 from src_06.step4_preprocessing import process_file
 from src_06.utils import load_config
 # from multilingual_pipeline.conversion import output_converison
-# from url_integration.gcs_url import generate_signed_url
 # from src.step_7_utility import extract_markdown_tables
 import time
 import re
 from src_06.step8_utility import escape_inner_quotes,replace_links,safe_json_loads
-from src_06.step9_persistant_memory import save_chat_turn,load_chat_context
+from persistant_memory_10.load_chat_history import load_chat_history
+from persistant_memory_10.loading_and_saving_chat import save_chat_turn
 from langchain_google_genai import ChatGoogleGenerativeAI
-def build_prompt(query, chat_history, retrieved_docs):
-    conversation_context = ""
-    for msg in chat_history:
-        conversation_context += (
-            f"User: {msg['question']}\n"
-            f"Assistant: {msg['answer']['response']}\n\n"
-        )
-
-    final_prompt = f"""
-You are an AI assistant.
-
-Previous conversation (for reference only, do NOT answer from this unless relevant):
-{conversation_context}
-
-Retrieved knowledge base context:
-{retrieved_docs}
-
-User question:
-{query}
-
-Answer the question using the retrieved knowledge.
-"""
-
-    return final_prompt.strip()
-
-
 
 
 async def main(query,session_id="default_session"):
@@ -51,34 +25,12 @@ async def main(query,session_id="default_session"):
     em_model = config['embedding']['google']['model_name']
     embedding_model = GoogleGenerativeAIEmbeddings(model=em_model)
 
-    print(f"Loading session: {session_id}")
-    chat_content = load_chat_context(session_id)
-    conversation_context = ""
-    for msg in chat_content[-3:]:
-        conversation_context += (
-            f"User: {msg.get('question')}\n"
-            f"Assistant: {msg.get('answer')}\n\n"
-        )       
-    tasks = process_file(query=query, embedding_model=embedding_model)
+    print(f"Loading session: {session_id}")   
+    chat_history = load_chat_history(session_id=session_id,last_n =3)
 
-  
-    # final_prompt = build_prompt(
-    #     query=query,
-    #     chat_history=chat_content,
-    #     retrieved_docs=tasks["response"]
-    # )
+    tasks = process_file(query=query, embedding_model=embedding_model,chat_history=chat_history)
 
 
-    # llm = ChatGoogleGenerativeAI(
-    #     model=config["llm"]["google"]["model_name"],
-    #     temperature=0.3
-    # )
-
-    # llm_response = llm.invoke(final_prompt).content
-    # llm_response = "\n\n".join([f"{r['response']}" for r in llm_response])
-
-    # print("LLM Response: ",llm_response)
-    
     results = [tasks]  
 
     # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&7")

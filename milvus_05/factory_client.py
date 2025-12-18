@@ -11,8 +11,8 @@ import os
 from milvus_05.config import DB
 from src_06.utils import load_config
 config = load_config()
-MILVUS_HOST = config["milvus"]["host"]
-MILVUS_PORT = config["milvus"]["port"]
+MILVUS_HOST = os.getenv("MILVUS_HOST")
+MILVUS_PORT = os.getenv("MILVUS_PORT")
 # collection_name = config["milvus"]["collection_name"]
 # partition_name = config["milvus"]["partition_name"]
 
@@ -27,7 +27,7 @@ class MilvusDB:
             password='Milvus'  # If authentication is enabled
         )
         self.model = MilvusClient(
-            uri=f"tcp://{MILVUS_HOST}:{MILVUS_PORT}",  # to connect to VM '34.100.163.108:19530' / to run in VM 'milvus-standalone' / to run in local with docker 'localhost'
+            uri=f"http://{MILVUS_HOST}:{MILVUS_PORT}",  # to connect to VM '34.100.163.108:19530' / to run in VM 'milvus-standalone' / to run in local with docker 'localhost'
             token="root:Milvus"  # username:password format
         )
 

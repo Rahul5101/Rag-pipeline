@@ -1,0 +1,60 @@
+services:
+  etcd:
+    container_name: milvus-etcd-p01
+    image: quay.io/coreos/etcd:v3.5.18
+    restart: unless-stopped
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+    volumes:
+      - ./volumes/etcd:/etcd
+    command: etcd -advertise-client-urls=http://etcd:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+
+  minio:
+    container_name: milvus-minio-p01
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    restart: unless-stopped
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    ports:
+      - "9005:9000"
+      - "9006:9001"
+    volumes:
+      - ./volumes/minio:/minio_data
+    command: minio server /minio_data --console-address ":9001"
+
+  standalone:
+    container_name: milvus-standalone-p01
+    image: milvusdb/milvus:v2.6.0
+    restart: unless-stopped
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+      MQ_TYPE: woodpecker
+    ports:
+      - "19531:19530" 
+    depends_on:
+      - etcd
+      - minio
+    volumes:
+      - ./volumes/milvus:/var/lib/milvus
+
+  backend:
+    image: project_01:latest # This names the image after it is built
+    container_name: project_01
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      - standalone
+    environment:
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      MILVUS_HOST: standalone
+      MILVUS_PORT: 19530
+      MODAL_NAME: gemini-1.5-flash
+    volumes:
+      - "D:/valiance_sol/01_project/data_02:/app/data_02"
+      - "D:/valiance_sol/01_project/clean_04:/app/clean_04"
+    

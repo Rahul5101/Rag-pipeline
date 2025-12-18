@@ -1,0 +1,4 @@
+myenv
+.env
+service-account.json
+volumes
