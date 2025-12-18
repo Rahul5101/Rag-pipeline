@@ -1,6 +1,6 @@
 from milvus_05.factory_client import MilvusDB
 from milvus_05.config import DB
-from pymilvus import connections, Collection
+from pymilvus import connections, Collection, utility
 import os
 from dotenv import load_dotenv
 from src_06.utils import load_config
@@ -12,18 +12,17 @@ MILVUS_PORT = os.getenv("MILVUS_PORT")
 
 def loading_milvus():
     try:
-        # Try to connect to Milvus
         connections.connect("default", host=MILVUS_HOST, port=MILVUS_PORT)
         print("✅ Connected to Milvus!")
-        collection = Collection(name=DB.milvus_collection_name)
-        collection.load()
-        print("Collection loaded")
+        
+        # Check if collection exists before loading
+        if utility.has_collection(DB.milvus_collection_name):
+            collection = Collection(name=DB.milvus_collection_name)
+            collection.load()
+            print(f"📦 Collection '{DB.milvus_collection_name}' loaded into RAM")
+        else:
+            print(f"⚠️ Collection {DB.milvus_collection_name} not found. Initializing...")
+            milvus_db = MilvusDB()
+            # ... rest of your setup logic
     except Exception as e:
-        # If connection fails, initialize and set up
-        print("⚠️ Milvus connection failed, initializing database...")
-        milvus_db = MilvusDB()
-        milvus_client = milvus_db.load_db()
-        milvus_db.create_partition_if_not_exists(
-            collection_name=DB.milvus_collection_name,
-            partition_name=DB.default_partition
-        )
+        print(f"❌ Milvus Setup Error: {e}")

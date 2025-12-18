@@ -1,20 +1,32 @@
 from fastapi import FastAPI,Query, HTTPException
 from pydantic import BaseModel
 import asyncio
-from fastapi.responses import JSONResponse,FileResponse
 import time
-from src_06.step6_llm_loaders import main
-from milvus_05.milvus_loading import loading_milvus
 import os
+from fastapi.responses import JSONResponse,FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.concurrency import run_in_threadpool
 from fastapi import Header
 from urllib.parse import unquote,quote
+from contextlib import asynccontextmanager
+from src_06.step6_llm_loaders import main
+from milvus_05.milvus_loading import loading_milvus
 # from multilingual_pipeline.language_detector import detect_language
 # from multilingual_pipeline.conversion import output_converison,translation
 
 BASE_DIR = os.getcwd()
-app = FastAPI()
+# app = FastAPI()
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 Server starting up...")
+    try:
+        await run_in_threadpool(loading_milvus)
+    except:
+        print("Milvus loading failed during startup.")
+    yield
+
+app = FastAPI(lifespan=lifespan)
 origins = [
     "http://localhost",
     "http://localhost:3000",
@@ -34,7 +46,7 @@ app.add_middleware(
 # Request model: user sends a question
 class QuestionRequest(BaseModel):
     question: str
-    session_id: str = "test_session_01"
+    session_id: str
 # # Response model: we respond with JSON
 class AnswerResponse(BaseModel):
     answer: str
@@ -66,9 +78,8 @@ async def open_pdf_endpoint(file_path:str=Query(..., description="Encoded absolu
         }
     )
 
-
 @app.post("/query", response_model=AnswerResponse)
-def answer_question(request: QuestionRequest):
+async def answer_question(request: QuestionRequest):
     user_question = request.question
     session_id = request.session_id
     start_time = time.time()
@@ -76,8 +87,8 @@ def answer_question(request: QuestionRequest):
     
 
     print("translated query: ",user_question)
-    db_load = loading_milvus()
-    response_data = asyncio.run(main(query=user_question,session_id=session_id))
+    
+    response_data = await main(query=user_question,session_id=session_id)
     elapsed_time = time.time() - start_time
 
     print(f"\nTotal time consumed: {elapsed_time:.2f} seconds")
